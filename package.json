@@ -1,0 +1,20 @@
+{
+  "name": "ArduiTemp",               
+  "version": "1.0.0",
+  "author": "vvision",
+  "description": "Retrieve temperature from the web and display it on an arduino",
+  "license": "",                           
+  "engine": {                               
+    "node": "&gt;=0.4"
+  },
+  "main": "./lib/example.js",                
+  "bin": {
+    "my-command": "./bin/example"             
+  },
+  "dependencies" : {                      
+    "request": ""
+  },
+  "devDependencies": {                       
+    "request": ""
+  }
+}
