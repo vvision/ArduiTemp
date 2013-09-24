@@ -4,11 +4,31 @@ var fs = require('fs');
 var model = 'atmega328';//Replace with your model ID. (See: ino list-models)
 var blinkDelay = 0;//Exemple: 1000 / 50
 var refresh = 60000;//Expressed in seconds
+var apiKey = '';//Don't forget to add your wunderground apiKey
+var land = 'France';
+var city = 'Belfort';
+var lang = 'FR';
 
 var begin = "#include <avr/pgmspace.h>  //AVR library for writing to ROM\n #include <Charliplexing.h> //Imports the library, which needs to be initialized in setup.\n //Sets the time each frame is shown (milliseconds) \nconst unsigned int blinkdelay = " + blinkDelay + ";\n PROGMEM const uint16_t BitMap[][9] = {";
 var end = "{18000}};\n void setup() {\n LedSign::Init(DOUBLE_BUFFER | GRAYSCALE);  //Initializes the screen\n }\n void loop() {\n for (uint8_t gray = 1; gray < SHADES; gray++)DisplayBitMap(gray);  //Displays the bitmap\n }\n void DisplayBitMap(uint8_t grayscale){\n boolean run=true;    //While this is true, the screen updates\n byte frame = 0;      //Frame counter\n byte line = 0;       //Row counter\n unsigned long data;  //Temporary storage of the row data\n unsigned long start = 0;\n while(run == true) {\n for(line = 0; line < 9; line++) {\n //Here we fetch data from program memory with a pointer.\n data = pgm_read_word_near (&BitMap[frame][line]);//Kills the loop if the kill number is found\n if (data==18000){\n run=false;\n }\n //This is where the bit-shifting happens to pull out each LED from a row. If the bit is 1, then the LED is turned on, otherwise it is turned off.\n else\n for (byte led=0; led<14; ++led) {\n if (data & (1<<led)) {\n LedSign::Set(led, line, grayscale);\n }else {\n LedSign::Set(led, line, 0);}\n }\n }LedSign::Flip(true);\n  unsigned long end = millis();\n unsigned long diff = end - start;\n if ( start && (diff < blinkdelay) )delay( blinkdelay - diff );\n start = end;\n frame++;  }\n }";
 
-retrieveAndDisplay();//Immediate initialization
+//If apiKey isn't set in this file, check if a file named apiKey contains one.
+if(apiKey === '') {
+	fs.exists('apiKey', function (exists) {
+		if(exists) {
+			fs.readFile('apiKey', {encoding: 'utf8'},function (err, data) {
+				if (err) throw err;
+				if(data) {
+					apiKey = data.trim();
+					console.log(apiKey);
+					retrieveAndDisplay();//First initialization
+					} else {
+						console.error('You must provide a valid wunderground apiKey!');
+					}
+			});
+		}
+	});
+}
 
 //Update temperature every
 setInterval(function() {
@@ -17,7 +37,7 @@ setInterval(function() {
 
 //Retrieve the current temperature
 function retrieveAndDisplay() {
-	request('http://api.wunderground.com/api/e5531d42c9ae4d4a/forecast/conditions/lang:FR/q/France/Belfort.json', function (error, response, body) {
+	request('http://api.wunderground.com/api/' + apiKey + '/forecast/conditions/lang:' + lang + '/q/' + land +'/' + city + '.json', function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 		  //console.log(body)
 		  var temperature = JSON.parse(body).current_observation.temp_c;
