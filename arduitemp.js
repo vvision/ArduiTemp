@@ -1,10 +1,12 @@
 var request = require('request');
 var spawn = require('child_process').spawn;
 var fs = require('fs');
+
+//Parameters
 var model = 'atmega328';//Replace with your model ID. (See: ino list-models)
 var blinkDelay = 0;//Exemple: 1000 / 50
-var refresh = 60000;//Expressed in seconds
-var apiKey = '';//Don't forget to add your wunderground apiKey
+var refresh = 60000;//Expressed in milliseconds
+var apiKey = '';//Don't forget to add your wunderground apiKey here or in an apiKey file
 var land = 'France';
 var city = 'Belfort';
 var lang = 'FR';
